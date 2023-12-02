@@ -1,0 +1,87 @@
+---
+title: "Oczekiwana długość życia a PKB per capita"
+author: "Radosław Dzierzawa"
+date: "`r Sys.Date()`"
+output: slidy_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Regiony
+W analizowanym zbiorze jest państw pogrupowanych w 6 regionów (Asia, Europe, Africa, North America, South America, Oceania).
+
+Liczba państw w poszczególnych regionach kształtuje się następująco
+
+```{r}
+data <- read.csv("C:/Users/Rado/Desktop/Język R/plotly1conti.csv", header = TRUE)
+
+liczba_panstw <- length(data$Country)
+region <- table(data$Region)
+wynik <- as.data.frame(region)
+colnames(wynik) <- c("Region", "Liczba państw")
+wynik
+
+```
+
+## Oczekiwana długosć życia w Regionach
+
+```{r}
+data <- read.csv("C:/Users/Rado/Desktop/Język R/plotly1conti.csv", header = TRUE)
+
+srednia_dlugosc <- aggregate(Life.expectancy ~ Region, data = data, FUN = mean)
+srednia_dlugosc <- srednia_dlugosc[order(srednia_dlugosc$Life.expectancy), ]
+colnames(srednia_dlugosc) <- c("Region","Średnia.oczekiwana.długość.życia")
+srednia_dlugosc
+```
+## PKB per capita w regionach
+
+```{r}
+data <- read.csv("C:/Users/Rado/Desktop/Język R/plotly1conti.csv", header = TRUE, )
+
+srednie_pkb_per_capita <- aggregate(`GDP.per.capita` ~ Region, data = data, FUN = function(x) mean(x, na.rm = TRUE))
+
+srednie_pkb_per_capita <- srednie_pkb_per_capita[order(srednie_pkb_per_capita$`GDP.per.capita`), ]
+
+colnames(srednie_pkb_per_capita) <- c("Region", "Średnie.PKB.per.capita")
+
+srednie_pkb_per_capita
+```
+
+## Oczekiwana długość życia a PKB per capita
+### Przygotowanie zmiennych jakościowych
+
+
+```{r}
+kod <- "dane$Zycie <- factor(ifelse(dane$Life.expectancy <= mean(dane$Life.expectancy),
+                                     'krótkie',
+                                     'długie'),
+                              levels = c('krótkie', 'długie'))
+
+dane$PKB <- factor(ifelse(dane$GDP.per.capita <= mean(dane$GDP.per.capita),
+                           'niskie',
+                           'wysokie'),
+                    levels = c('niskie', 'wysokie'))"
+cat(kod)
+```
+
+## Oczekiwana długość życia a PKB per capita
+
+```{r}
+
+data$Zycie <- factor(ifelse(data$Life.expectancy <= mean(data$Life.expectancy),
+                            "krótkie",
+                            "długie"),
+                     levels = c("krótkie", "długie"))
+
+data$PKB <- factor(ifelse(data$GDP.per.capita <= mean(data$GDP.per.capita),
+                          "niskie",
+                          "wysokie"))
+
+tabela <- table(data$PKB, data$Zycie)
+
+proporcje <- prop.table(tabela, margin = 2) * 100
+proporcje
+
+```
